@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ДЗ 1</title>
+    <style>
+        :root {
+            --primary: #00d2ff;
+            --secondary: #3a7bd5;
+            --bg: #050a10;
+            --text: #e0e0e0;
+            --accent: #ffcc00;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            transition: background-color 1s ease;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .slider-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+        }
+
+        .slide {
+            position: absolute;
+            width: 85%;
+
+            height: 80%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            padding: 40px;
+            background: rgba(10, 20, 30, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+
+        .slide.active {
+            display: flex;
+            animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1,
+        h2 {
+            color: var(--primary);
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        .content {
+            /*font-size: 1.15rem;*/
+            font-size: 200.0%;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .image-placeholder {
+            width: 100%;
+            height: 220px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px dashed #444;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 15px 0;
+            color: #888;
+            border-radius: 10px;
+            text-align: center;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        th,
+        td {
+            border: 1px solid #444;
+            padding: 15px;
+            text-align: left;
+        }
+
+        th {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 30px;
+            display: flex;
+            gap: 20px;
+            z-index: 100;
+        }
+
+        button {
+            background: rgba(0, 210, 255, 0.1);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 12px 25px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            background: var(--primary);
+            color: #000;
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 5px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            transition: width 0.3s;
+            z-index: 1000;
+        }
+
+        .quote-card {
+            background: rgba(255, 204, 0, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            font-size: 200.0%;
+            border-left: 4px solid var(--accent);
+        }
+    </style>
+</head>
+
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+    <div class="progress-bar" id="progress"></div>
+
+    <div class="slider-container">
+        <!-- Слайд 0 -->
+        <div class="slide active" style="backdrop-filter: blur(5px);">
+            <div class="content">
+                <h1>Что такое философия?</h1>
+                <p style="font-size: larger;">Философия - «philos» (любовь) и «sophia» (мудрость)</p>
+            </div>
+        </div>
+        <!-- Слайд 1 -->
+        <div class="slide">
+            <h1>Что такое философия?</h1>
+            <div class="content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Формы мировоззрения</th>
+                            <th>Виды мировоззрения</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Мифология</td>
+                            <td>Космоцентризм</td>
+                        </tr>
+                        <tr>
+                            <td>Религия</td>
+                            <td>Теоцентризм</td>
+                        </tr>
+                        <tr>
+                            <td>Философия</td>
+                            <td>Антропоцентризм</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Слайд 2 -->
+        <div class="slide">
+            <h1>Что такое философия?</h1>
+            <div class="content">
+                <table>
+                    <tr>
+                        <td>
+                            <div class="quote-card" style="font-size: 100%;">
+                                <b>Предмет:</b> «Человек и Мир».<br>
+                                <b>Основной вопрос:</b> Что первично - дух или материя?
+                            </div>
+                        </td>
+                        <td>
+                            <div class="quote-card" style="font-size: 100%;">
+                                <b>Гностицизм:</b> Мир познаваем.<br>
+                                <b>Агностицизм:</b> Мир не познаваем.
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="quote-card" style="font-size: 100%;">
+                                <b>Материализм:</b> Первична материя, сознание - её продукт.<br>
+                                <b>Идеализм:</b> Первично сознание, материя - производное.
+                            </div>
+                        </td>
+                        <td>
+                            <div class="quote-card" style="font-size: 100%;">
+                                <b>Объективный мир</b> - независим от нашей модели восприятия.<br>
+                                <b>Субъективный мир</b> - реальность как комплекс личных ощущений.
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Слайд 3 -->
+        <div class="slide">
+            <h1>Разделы и приложения</h1>
+            <div class="content">
+                <table>
+                    <tr>
+                        <td>
+                            <div class="quote-card" style="font-size: 100%;">
+                                Классический поиск истины<br>
+                                Онтология<br>
+                                Практическая мудрость<br>
+                                Критика разума<br>
+                                Аналитическая философия<br>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="quote-card" style="font-size: 100%;">
+                                Гносеология<br>
+                                Этика<br>
+                                Эстетика<br>
+                                Методология
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Слайд 5: Декарт -->
+        <div class="slide">
+            <h1>Рене Декарт (1596–1650)</h1>
+            <div class="content grid-2">
+                <div style="text-align: left;">
+                    <p>Французский дворянин, получивший образование в иезуитском коллеже Ла-Флеш. Именно там он
+                        столкнулся со схоластикой, в которой позже разочаровался.</p>
+                    <p>Декарт искал утверждение, которое нельзя подвергнуть сомнению</p>
+                </div>
+                <div>
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Frans_Hals_-_Portret_van_René_Descartes.jpg/330px-Frans_Hals_-_Portret_van_René_Descartes.jpg"
+                            alt="Портрет Рене Декарта" style="max-width: 110%; max-height: 110%;">
+                </div>
+            </div>
+        </div>
+
+        <!-- Слайд 6: Скептицизм -->
+        <div class="slide" style='backdrop-filter:blur(0px);'>
+
+            <div class="content">
+                <div class="quote-card" style="font-size: 100%; text-align: center;">
+                    <b>«Cogito, ergo sum»</b><br>
+                    Я сомневаюсь, значит мыслю. Я мыслю, значит я существую.
+                </div>
+            </div>
+        </div>
+
+        <!-- Слайд 7: Труды -->
+        <div class="slide">
+            <h1>Научные и философские труды</h1>
+            <div class="content">
+                <div class="grid-2">
+                    <div>
+                        <ol>
+                            <li><b>Рассуждение о методе</b></li>
+                            <li><b>Размышления о первой философии</b></li>
+                            <li><b>Начала философии</b></li>
+                            <li><b>Геометрия</b></li>
+                            <li><b>Страсти Души</b></li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="slide">
+            <div class="content">
+                <h1>Три афоризма</h1>
+
+            </div>
+        </div>
+        <!-- Слайд 8: Афоризм Ницше -->
+        <div class="slide">
+            <h1 style="font-size: 500%;">Фридрих Ницше</h1>
+            <div class="content">
+                <div class="quote-card" style="text-align: center;">
+                    «Все что не убивает нас, делает нас сильнее»
+                </div>
+            </div>
+        </div>
+
+        <!-- Слайд 9: Афоризм Эпиктета -->
+        <div class="slide">
+            <h1 style="font-size: 500%;">Эпиктет</h1>
+            <div class="content">
+                <div class="quote-card" style="text-align: center;">
+                    «Людей расстраивают не события, а суждения о них»
+                </div>
+            </div>
+        </div>
+
+        <!-- Слайд 10: Афоризм Платона -->
+        <div class="slide">
+            <h1 style="font-size: 500%;">Платон</h1>
+            <div class="content">
+                <div class="quote-card" style="text-align: center;">
+                    «Всегда надо уметь выбирать средний путь»
+                </div>
+            </div>
+        </div>
+
+        <!-- Слайд 11: Деградация культуры -->
+        <div class="slide" style="backdrop-filter: blur(0px);">
+            <h1 style="font-size: 500%;">Культурный ландшафт Казахстана</h1>
+            <div class="content" style="text-align: left;">
+                <li>Культура как гарант национальной безопасности.</li>
+                <li>Доминирование ТЦ над театрами и музеями.</li>
+                <li>«Вирус выгоды»: прагматизм вытесняет духовность.</li>
+                <li>Разрыв связи между элитой и обществом.</li>
+                <li>Образование без морали и этического фундамента.</li>
+                <li>«Новое средневековье» в эпоху цифровых технологий.</li>
+                <li>Политика как имитация и массовка.</li>
+                <li>Кризис авторитетов и лидеров мнений.</li>
+            </div>
+        </div>
+        <!-- Слайд 12: Спасибо за внимание -->
+        <div class="slide">
+            <div class="content">
+                <h1>Спасибо за внимание!</h1>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="controls">
+        <button id="prevBtn">⬅</button>
+        <button id="nextBtn">➡</button>
+    </div>
+
+    <script>
+        /**
+         * КЛАСС ЧАСТИЦЫ
+         */
+        class Particle {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * this.canvas.width;
+                this.y = Math.random() * this.canvas.height;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.mass = Math.random() * 2 + 1;
+                this.size = this.mass * 5;
+                this.life = Math.random();
+            }
+
+            update(generator) {
+                // Применяем сопротивление среды
+                this.vx *= generator.drag;
+                this.vy *= generator.drag;
+
+                // Логика конкретного генератора
+                generator.applyPhysics(this);
+
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Зацикливание экрана
+                if (this.x < 0) this.x = this.canvas.width;
+                if (this.x > this.canvas.width) this.x = 0;
+                if (this.y < 0) this.y = this.canvas.height;
+                if (this.y > this.canvas.height) { this.y = 0; this.x = this.x + 0.01 * this.canvas.width * Math.random(); }
+            }
+        }
+
+        /**
+         * БАЗОВЫЙ КЛАСС ГЕНЕРАТОРА
+         */
+        class Generator {
+            constructor(drag = 0.99, primaryColor = '#00d2ff', secondaryColor = 'rgba(0, 210, 255, 0.1)') {
+                this.drag = drag;
+                this.primaryColor = primaryColor;
+                this.secondaryColor = secondaryColor;
+            }
+
+            applyPhysics(p) { /* Переопределяется в наследниках */ }
+
+            draw(ctx, p, allParticles) {
+                ctx.fillStyle = this.primaryColor;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        /**
+         * ГЕНЕРАТОР 1: Ночное небо (Классика)
+         */
+        class StarfieldGenerator extends Generator {
+            applyPhysics(p) {
+                // Легкое броуновское движение
+                p.vx += (Math.random() - 0.5) * 0.1;
+                p.vy += (Math.random() - 0.5) * 0.1;
+            }
+
+            draw(ctx, p, all) {
+                // Линии связей
+                ctx.strokeStyle = this.secondaryColor;
+                for (let other of all) {
+                    let d = Math.hypot(p.x - other.x, p.y - other.y);
+                    if (d < 120) {
+                        ctx.lineWidth = (1 - d / 120) * 10;
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(other.x, other.y);
+                        ctx.stroke();
+                    }
+                }
+                super.draw(ctx, p);
+            }
+        }
+
+        /**
+         * ГЕНЕРАТОР 2: Дождь (Для разделов о законах и структуре)
+         */
+        class RainGenerator extends Generator {
+            constructor() {
+                super(0.95, '#3a7bd5', 'rgba(58, 123, 213, 0.4)');
+            }
+            applyPhysics(p) {
+                p.vy += 0.2 * p.mass; // Гравитация
+                p.vx += 0.1 // ветер
+                p.vx *= 0.99; // Гасим горизонтальную скорость
+            }
+            draw(ctx, p) {
+                ctx.strokeStyle = this.primaryColor;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(p.x + p.vx, p.y + p.vy * 2);
+                ctx.stroke();
+            }
+        }
+
+        /**
+         * ГЕНЕРАТОР 3: Шум/Поток (Для Декарта и размышлений)
+         */
+        class FlowFieldGenerator extends Generator {
+            constructor(pcol = '#ffcc00', bcol = 'rgba(255, 204, 0, 0.2)') {
+                super(0.98, pcol, bcol);
+                this.time = 0;
+            }
+            applyPhysics(p) {
+                this.time += 0.0001;
+                let angle = Math.sin(p.x * 0.005 + this.time) * Math.PI * 2;
+                p.vx += Math.cos(angle) * 0.1;
+                p.vy += Math.sin(angle) * 0.1;
+            }
+        }
+
+        /**
+         * ГЕНЕРАТОР 4: Гравитация/Центр (Для афоризмов и фокуса)
+         */
+        class GravityGenerator extends Generator {
+            constructor(q = 1, pcol = '#00ff88') {
+                super(0.99, pcol, 'rgba(0, 255, 136, 0.2)');
+                this.q = q;
+            }
+            applyPhysics(p) {
+                let dx = window.innerWidth / 2 - p.x;
+                let dy = window.innerHeight / 2 - p.y;
+                let dist = Math.hypot(dx, dy);
+                if (dist > p.size*5 || this.q < 0){
+                dist = dist * dist;
+                let force = Math.min(dist * 0.001, 0.5);
+                    p.vx += (dx / dist) * force * this.q + 0.1*(Math.random() - 0.5) * 2;;
+                    p.vy += (dy / dist) * force * this.q + 0.1*(Math.random() - 0.5) * 2;;
+                }
+            }
+        }
+
+        class VortexGenerator extends Generator {
+            constructor(q = 1, pcol = '#00ff88') {
+                super(0.99, pcol, 'rgba(0, 255, 136, 0.2)');
+                this.q = q;
+            }
+            applyPhysics(p) {
+                let dx = window.innerWidth / 2 - p.x;
+                let dy = window.innerHeight / 2 - p.y;
+                let dist = Math.hypot(dx, dy);
+                dist = dist;
+                let force = Math.min(dist * 0.001, 0.5);
+                p.vx += -((dy + 0.1 * dx) / dist) * force * this.q;
+                p.vy += ((dx + 0.1 * dy) / dist) * force * this.q;
+            }
+        }
+
+        // --- Инициализация системы ---
+
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let currentGeneratorIndex = 0;
+
+        let flow = new FlowFieldGenerator();
+        let f_start = new StarfieldGenerator();
+        let rain = new RainGenerator();
+
+        // Пул генераторов для разных слайдов
+        const generators = [
+            f_start,
+            f_start,                       // Слайд 1
+            f_start,                           // Слайд 2
+            new StarfieldGenerator(0.99, '#ff00ff', '#ff00ff'),        // Слайд 4
+            new FlowFieldGenerator('rgb(200, 200, 200)', 'rgb(200, 255, 50)'), // Слайд 5 (Декарт)
+            new GravityGenerator(10.0),                         // Слайд 6 (Cogito)
+            new GravityGenerator(5.0),                         // Слайд 6 (Cogito)
+            new GravityGenerator(-10.0, 'rgb(250, 100, 50)'),                            // Слайд 7
+            new StarfieldGenerator(0.99, 'rgb(250, 100, 50)', 'rgb(250, 100, 50)'),
+            flow,                   // Слайд 9
+            new VortexGenerator(-0.1, '#00d2ff'),
+
+            rain                            // Слайд 10
+        ];
+
+        function init() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            particles = [];
+            for (let i = 0; i < 200; i++) particles.push(new Particle(canvas));
+            animate();
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(5, 10, 16, 0.2)'; // Хвосты
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const activeGen = generators[currentGeneratorIndex] || generators[0];
+
+            particles.forEach(p => {
+                p.update(activeGen);
+                activeGen.draw(ctx, p, particles);
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        // --- Слайдер ---
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progress');
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + slides.length) % slides.length;
+            slides[currentSlide].classList.add('active');
+
+            // Плавно переключаем генератор
+            currentGeneratorIndex = currentSlide;
+
+            const percent = ((currentSlide + 1) / slides.length) * 100;
+            progressBar.style.width = percent + '%';
+
+            // Обновляем CSS переменные для плавности стиля
+            const gen = generators[currentGeneratorIndex];
+            document.documentElement.style.setProperty('--primary', gen.primaryColor);
+        }
+
+        document.getElementById('nextBtn').onclick = () => showSlide(currentSlide + 1);
+        document.getElementById('prevBtn').onclick = () => showSlide(currentSlide - 1);
+
+        document.onkeydown = (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') showSlide(currentSlide + 1);
+            if (e.key === 'ArrowLeft') showSlide(currentSlide - 1);
+        };
+
+        window.onresize = () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        };
+
+        init();
+        showSlide(0);
+
+    </script>
+
+</body>
+
+</html>
